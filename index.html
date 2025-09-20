@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Video Reveal</title>
+  <style>
+    html, body {
+      width: 100vw;
+      max-width: 100vw;
+      overflow-x: hidden;
+      box-sizing: border-box;
+    }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #f9f9f9; }
+    .header-text {
+      width: 100vw;
+      max-width: 100vw;
+      box-sizing: border-box;
+      text-align: center;
+      font-size: 2em;
+      font-weight: bold;
+      color: #ff00cc;
+      margin-top: 0.7em;
+      margin-bottom: 0.5em;
+      letter-spacing: 2px;
+      text-shadow: 2px 2px 8px #fffbe7, 0 2px 8px #ff00cc44;
+      z-index: 3000;
+      position: fixed;
+      top: 0;
+      left: 0;
+      background: rgba(255,255,255,0.85);
+      padding: 0.5em 0;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      text-align: center;
+      padding-top: 3.5em;
+      width: 100vw;
+      box-sizing: border-box;
+      position: relative;
+      min-height: 60vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: visible;
+    }
+    button { padding: 1em 2em; font-size: 1.2em; border-radius: 8px; border: none; background: #007bff; color: #fff; cursor: pointer; position: fixed; left: 50%; bottom: 7em; transform: translateX(-50%); z-index: 2000; max-width: 95vw; box-sizing: border-box; }
+    button:active { background: #0056b3; }
+    video { width: 100%; margin-top: 1em; display: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+    img#goofyImg {
+      border: 4px solid #ff00cc;
+      background: #fffbe7;
+      box-shadow: 0 2px 16px rgba(255,0,204,0.2);
+      transition: opacity 0.3s;
+      opacity: 0;
+      z-index: 1000;
+      max-width: 98vw;
+      max-height: 90vh;
+      width: auto;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      position: static;
+      top: unset;
+      left: unset;
+      transform: none;
+    }
+    img#goofyImg.visible {
+      opacity: 1;
+    }
+    canvas { position: fixed; pointer-events: none; top: 0; left: 0; width: 100vw !important; height: 100vh !important; z-index: 999; display: none; max-width: 100vw; max-height: 100vh; }
+    @media (max-width: 600px) {
+      .container { padding: 1em; }
+      button { width: 100%; font-size: 1em; }
+    }
+    @keyframes insane-shake {
+      0% { transform: translate(0, 0) rotate(0deg) scale(1); }
+      10% { transform: translate(-10px, 5px) rotate(-8deg) scale(1.05); }
+      20% { transform: translate(12px, -8px) rotate(8deg) scale(0.98); }
+      30% { transform: translate(-8px, 10px) rotate(-6deg) scale(1.07); }
+      40% { transform: translate(8px, -10px) rotate(6deg) scale(0.95); }
+      50% { transform: translate(-12px, 8px) rotate(-8deg) scale(1.1); }
+      60% { transform: translate(10px, -5px) rotate(8deg) scale(0.97); }
+      70% { transform: translate(-8px, 10px) rotate(-6deg) scale(1.08); }
+      80% { transform: translate(8px, -10px) rotate(6deg) scale(0.96); }
+      90% { transform: translate(-10px, 5px) rotate(-8deg) scale(1.05); }
+      100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+    }
+    .insane-shake {
+      animation: insane-shake 0.25s infinite cubic-bezier(.36,.07,.19,.97);
+    }
+  </style>
+  <link rel="icon" href="data:,">
+</head>
+<body>
+  <div class="header-text">HAPPY BIRTHDAY MONKEY UNC</div>
+  <div class="container">
+    <video id="myVideo" controls>
+      <source src="pascalGreeting.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+    <img id="goofyImg" src="pascal.JPEG" alt="Goofy Pascal" class="insane-shake visible" onerror="this.style.display='none';document.getElementById('imgErrorMsg').style.display='block';">
+    <div id="imgErrorMsg" style="display:none;color:red;font-weight:bold;">Image failed to load. Check the file name and extension.</div>
+    <canvas id="confettiCanvas"></canvas>
+  </div>
+  <button id="showVideoBtn">Do not click</button>
+  <script>
+    function startConfetti() {
+      const canvas = document.getElementById('confettiCanvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      canvas.style.display = 'block';
+      const ctx = canvas.getContext('2d');
+      const confettiCount = 120;
+      const confetti = [];
+      for (let i = 0; i < confettiCount; i++) {
+        confetti.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * -canvas.height,
+          r: Math.random() * 6 + 4,
+          d: Math.random() * confettiCount,
+          color: `hsl(${Math.random()*360},100%,60%)`,
+          tilt: Math.random() * 20 - 10
+        });
+      }
+      let angle = 0;
+      function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        angle += 0.01;
+        for (let i = 0; i < confettiCount; i++) {
+          let c = confetti[i];
+          ctx.beginPath();
+          ctx.ellipse(c.x, c.y, c.r, c.r/2, c.tilt, 0, 2 * Math.PI);
+          ctx.fillStyle = c.color;
+          ctx.fill();
+          c.y += Math.cos(angle + c.d) + 2 + c.r/2;
+          c.x += Math.sin(angle) * 2;
+          c.tilt += Math.random() * 0.2 - 0.1;
+          if (c.y > canvas.height) {
+            c.x = Math.random() * canvas.width;
+            c.y = Math.random() * -20;
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+      draw();
+      setTimeout(() => { canvas.style.display = 'none'; ctx.clearRect(0,0,canvas.width,canvas.height); }, 3500);
+    }
+    // Show confetti and shake on page load
+    window.onload = function() {
+      const img = document.getElementById('goofyImg');
+      img.style.display = 'block';
+      img.classList.add('visible');
+      img.classList.add('insane-shake');
+      startConfetti();
+    };
+    document.getElementById('showVideoBtn').onclick = function() {
+      // Hide image
+      const img = document.getElementById('goofyImg');
+      img.style.display = 'none';
+      // Show and play video
+      const vid = document.getElementById('myVideo');
+      vid.style.display = 'block';
+      vid.play();
+      // Hide button
+      this.style.display = 'none';
+    };
+  </script>
+</body>
+</html>
